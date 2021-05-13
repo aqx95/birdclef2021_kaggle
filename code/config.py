@@ -1,3 +1,5 @@
+from pathlib import Path
+
 class GlobalConfig:
     SEED = 2020
     BATCH_SIZE = 100
@@ -12,10 +14,10 @@ class GlobalConfig:
     TRAIN_STEP_SCHEDULER = False
     VAL_STEP_SCHEDULER = True
 
-    TRAIN_IMAGE_PATH =
-    CSV_PATH =
-    SAVE_PATH =
-    LOG_PATH =
+    TRAIN_IMAGE_PATH = Path('/content/audio_images')
+    CSV_PATH = Path('/content/rich_train_metadata.csv')
+    SAVE_PATH = Path('../save')
+    LOG_PATH = Path('../log')
 
     MODEL_NAME = 'resnet50'
     PRETRAINED = True

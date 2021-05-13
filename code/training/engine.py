@@ -9,6 +9,11 @@ import pytz
 import torch
 import logging
 
+from meter import MetricMeter
+from utils.logger import log
+from sklearn.metrics import label_ranking_average_precision_score
+
+
 class Fitter():
     def __init__(self, model, device, config):
         self.model = model
@@ -17,6 +22,9 @@ class Fitter():
         self.logger = logging.getLogger('training')
 
         self.epoch = 0
+        self.best_f1 = 0
+        self.track_train = {"loss": [], "lrap":[], "precision":[], "recall":[], "f1":[]}
+        self.track_valid = {"loss": [], "lrap":[], "precision":[], "recall":[], "f1":[]}
 
         if not os.path.exists(self.config.SAVE_PATH):
             os.makedirs(self.config.SAVE_PATH)
@@ -24,8 +32,8 @@ class Fitter():
             os.makedirs(self.config.LOG_PATH)
 
         self.loss = nn.BCEWithLogitsLoss()
-        self.optimizer = torch.optim.Adam(net.parameters(), lr=8e-4)
-        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, eta_min=1e-5, T_max=self.config.NUM_EPOCHS)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=8e-4)
+        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, eta_min=1e-5, T_max=self.config.NUM_EPOCHS)
 
 
     def fit(self, train_loader, valid_loader, fold):
@@ -34,42 +42,57 @@ class Fitter():
         for epoch in range(self.config.NUM_EPOCHS):
             #Training
             start_time = time.time()
-            train_metrics = train_one_epoch(train_loader)
+            train_metrics = self.train_one_epoch(train_loader)
             end_time = time.time()
 
+            for key, value in train_metrics.items():
+                self.track_train[key].append(value)
+
             train_elapsed_time = time.strftime("%H:%M:%S", time.gmtime(end_time - start_time))
-            self.logger.info("[RESULT]: Train. Epoch {} | Loss: {:.3f} | LRAP: {:.3f} | \
-                    F1: {:.3f} | Precision: {:.3f} | Recall: {:.3f} \
-                    Time Elapsed: {}".format(self.epoch, train_metrics['loss'], train_metrics['lrap'],
+            self.logger.info("[RESULT]: Train. Epoch {} | Loss: {:.3f} | LRAP: {:.3f} | " \
+                    "F1: {:.3f} | Precision: {:.3f} | Recall: {:.3f} | " \
+                    "Time Elapsed: {}".format(self.epoch, train_metrics['loss'], train_metrics['lrap'],
                     train_metrics['f1'], train_metrics['precision'], train_metrics['recall'], train_elapsed_time))
 
             #Validation
             start_time = time.time()
-            valid_metrics = validate_one_epoch(train_loader)
+            valid_metrics = self.validate_one_epoch(valid_loader)
             end_time = time.time()
 
+            for key, value in valid_metrics.items():
+                self.track_valid[key].append(value)
+
             valid_elapsed_time = time.strftime("%H:%M:%S", time.gmtime(end_time - start_time))
-            self.logger.info("[RESULT]: Validate. Epoch {} | Loss: {:.3f} | LRAP: {:.3f} | \
-                    F1: {:.3f} | Precision: {:.3f} | Recall: {:.3f} \
-                    Time Elapsed: {}".format(self.epoch, valid_metrics['loss'], valid_metrics['lrap'],
+            self.logger.info("[RESULT]: Validate. Epoch {} | Loss: {:.3f} | LRAP: {:.3f} | "\
+                    "F1: {:.3f} | Precision: {:.3f} | Recall: {:.3f} | "\
+                    "Time Elapsed: {}".format(self.epoch, valid_metrics['loss'], valid_metrics['lrap'],
                     valid_metrics['f1'], valid_metrics['precision'], valid_metrics['recall'], valid_elapsed_time))
 
-            #update scheduler
-            if self.config.val_step_scheduler:
+            self.monitored_metrics = valid_metrics['f1']
+            #Save
+            if self.best_f1 < valid_metrics['f1']:
+              self.logger.info(f"F1 score improved {self.best_f1} -> {valid_metrics['f1']}. Saving Model...")
+              self.save(self.config.SAVE_PATH/'{}_fold{}.pt'.format(self.config.MODEL_NAME, fold))
+              self.best_f1 = valid_metrics['f1']
+
+            #Update scheduler
+            if self.config.VAL_STEP_SCHEDULER:
                 if isinstance(self.scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
                     self.scheduler.step(self.monitored_metrics)
                 else:
                     self.scheduler.step()
 
             self.epoch += 1
+            self.logger.info("----------------------------------------------------------------")
+
+        return self.track_train, self.track_valid
 
 
     def train_one_epoch(self, train_loader):
-        self.model.train
+        self.model.train()
         meter = MetricMeter()
-        start_time = time.time()
 
-        pbar = tqdm(enumerate(train_loader), len(train_loader))
+        pbar = tqdm(enumerate(train_loader), total=len(train_loader))
         for step, (imgs, labels) in pbar:
             imgs, labels = imgs.to(self.device), labels.to(self.device)
             batch_size = labels.shape[0]
@@ -79,35 +102,34 @@ class Fitter():
             output = self.model(imgs)
             loss = self.loss(output, labels)
             loss.backward()
-            optimizer.step()
-            metric['loss'] = loss.item()
+            self.optimizer.step()
 
             with torch.no_grad():
+                metric['loss'] = loss.item()
                 output = output.sigmoid()
                 labels = (labels > 0.5) * 1.0
                 metric['lrap'] = label_ranking_average_precision_score(labels.cpu().numpy(), output.cpu().numpy())
 
                 output = (output > 0.5) * 1.0
                 precision = (output * labels).sum() / (1e-6 + output.sum())
-                metric['precision'] = precision
+                metric['precision'] = precision.item()
                 recall = (output * labels).sum() / (1e-6 + labels.sum())
-                metric['recall'] = recall
+                metric['recall'] = recall.item()
                 f1 = (2 * precision * recall) / (1e-6 + precision + recall)
-                metric['f1'] = f1
+                metric['f1'] = f1.item()
 
-            meter.update(metric, batch_size)
+            meter.update(metric)
 
             if self.config.TRAIN_STEP_SCHEDULER:
                 self.scheduler.step(self.epoch + step/len(train_loader))
 
-            end_time = time.time()
             metrics = meter.avg
             if self.config.VERBOSE:
-                description = f"Train Steps {step}/{len(train_loader)} loss: {metrics['loss']:.3f}, \
-                                lrap: {metrics['lrap']:.3f}, precision: {metrics['precision']:.3f}, \
-                                recall: {metrics['recall']:.3f}, f1: {metrics['f1']:.3f} \
-                                time: {(end_time - start_time):.3f}"
-                pbar.set_description(description)
+                pbar.set_postfix(loss = f"{metrics['loss']:.3f}",
+                                 lrap = f"{metrics['lrap']:.3f}",
+                                 precision = f"{metrics['precision']:.3f}",
+                                 recall = f"{metrics['recall']:.3f}",
+                                 f1 = f"{metrics['f1']:.3f}")
 
         return meter.avg
 
@@ -137,11 +159,25 @@ class Fitter():
             metric['lrap'] = lrap
 
             pred = (pred > 0.5) * 1.0
-            precision = ((pred * labels).sum() / (1e-6 + output.sum())).item()
+            precision = ((pred * labels).sum() / (1e-6 + pred.sum())).item()
             metric['precision'] = precision
             recall = ((pred * labels).sum() / (1e-6 + labels.sum())).item()
             metric['recall'] = recall
-            f1 = 2 * precision * recall
+            f1 = (2 * precision * recall) / (1e-6 + precision + recall)
             metric['f1'] = f1
 
         return metric
+
+
+    def save(self, path):
+      self.model.eval()
+      torch.save(
+          {
+              "model_state_dict": self.model.state_dict(),
+              "optimizer_state_dict": self.optimizer.state_dict(),
+              "scheduler_state_dict": self.scheduler.state_dict(),
+              "best_f1": self.best_f1,
+              "epoch": self.epoch,
+          },
+          path
+      )

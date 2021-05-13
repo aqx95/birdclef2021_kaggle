@@ -3,7 +3,8 @@ class MetricMeter:
         self.reset()
 
     def reset(self):
-        self.metrics = {}
+        self.metrics = {"loss": 0, "lrap":0, "precision":0, "recall":0, "f1":0}
+        self.avg_metric = {"loss": 0, "lrap":0, "precision":0, "recall":0, "f1":0}
         self.sum = 0
 
     def update(self, metric, batch_size=1):
@@ -13,6 +14,6 @@ class MetricMeter:
 
     @property
     def avg(self):
-        for key, values in self.metrics.item():
-            self.metrics[key] /= self.sum
-        return self.metrics
+        for key, values in self.metrics.items():
+            self.avg_metric[key] = self.metrics[key] / self.sum
+        return self.avg_metric
