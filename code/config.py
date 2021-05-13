@@ -1,0 +1,22 @@
+class GlobalConfig:
+    SEED = 2020
+    BATCH_SIZE = 100
+    NUM_WORKERS = 2
+    NUM_CLASSES = 397
+    SR = 32000
+    DURATION = 7
+    MAX_READ_SAMPLES = 10
+    NUM_EPOCHS = 20
+    VERBOSE = True
+
+    TRAIN_STEP_SCHEDULER = False
+    VAL_STEP_SCHEDULER = True
+
+    TRAIN_IMAGE_PATH =
+    CSV_PATH =
+    SAVE_PATH =
+    LOG_PATH =
+
+    MODEL_NAME = 'resnet50'
+    PRETRAINED = True
+    DROP_RATE = 0.0
