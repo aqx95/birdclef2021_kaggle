@@ -24,10 +24,12 @@ class BirdClefDataset(Dataset):
 
     def __getitem__(self, idx):
         row = self.df.iloc[idx]
-        impath = self.config.TRAIN_IMAGE_PATH/f"{row.primary_label}/{row.filename}.npy"
-        image = np.load(str(impath))[:self.config.MAX_READ_SAMPLES]
-        #image = self.spec_store[row.filename]
-
+        if self.config.LOAD_FROM_MEM:
+            image = self.spec_store[row.filename]
+        else:
+            impath = self.config.TRAIN_IMAGE_PATH/f"{row.primary_label}/{row.filename}.npy"
+            image = np.load(str(impath))[:self.config.MAX_READ_SAMPLES]
+            
         image = image[np.random.choice(len(image))]
         image = self.normalize(image)
 
