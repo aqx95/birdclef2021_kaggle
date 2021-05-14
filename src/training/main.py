@@ -54,7 +54,7 @@ def seed_everything(seed=42):
   torch.backends.cudnn.deterministic = True
 
 #Plot train/validation history
-def plot_history(train, valid, epochs, fold, config):
+def plot_history(train, valid, fold, config):
     epochs = [i for i in range(config.NUM_EPOCHS)]
     plt.subplots(figsize=(12, 10))
     plt.tight_layout
