@@ -1,8 +1,9 @@
 import sys
-sys.path.append("../../code/")
+sys.path.append("../../src/")
 
 import joblib
 import logging
+import argparse
 import os, random, gc
 import re, time, json
 import pandas as pd
@@ -68,30 +69,33 @@ def plot_history(train, valid, epochs, fold, config):
 
 
  #Train single fold
- def train_fold(df, config, device, fold, audio_image_store):
-     model = BirdClefModel(config.MODEL_NAME, config.NUM_CLASSES).to(device)
-     train_df = df[df["fold"] != fold].reset_index(drop=True)
-     valid_df = df[df["fold"] == fold].reset_index(drop=True)
+def train_fold(df, config, device, fold, audio_image_store, logger):
+    model = BirdClefModel(config.MODEL_NAME, config.NUM_CLASSES).to(device)
+    train_df = df[df["fold"] != fold].reset_index(drop=True)
+    valid_df = df[df["fold"] == fold].reset_index(drop=True)
 
-     train_data = BirdClefDataset(audio_image_store, train_df, num_classes=config.NUM_CLASSES,
-                               sr=config.SR, duration=config.DURATION, config=config, is_train=True)
-     valid_data = BirdClefDataset(audio_image_store, valid_df, num_classes=config.NUM_CLASSES,
-                                sr=config.SR, duration=config.DURATION, config=config, is_train=False)
-     train_loader, valid_loader = prepare_loader(train_data, valid_data, config)
+    #log fold statistics
+    logger.info("Fold {}: Number of unique labels in train: {}".format(fold, train_df['primary_label'].nunique()))
 
-     fitter = Fitter(model, device, config)
-     train_tracker, valid_tracker = fitter.fit(train_loader, valid_loader, fold)
-     plot_history(train_tracker, valid_tracker, fold, config)
+    train_data = BirdClefDataset(audio_image_store, train_df, num_classes=config.NUM_CLASSES,
+                              sr=config.SR, duration=config.DURATION, config=config, is_train=True)
+    valid_data = BirdClefDataset(audio_image_store, valid_df, num_classes=config.NUM_CLASSES,
+                              sr=config.SR, duration=config.DURATION, config=config, is_train=False)
+    train_loader, valid_loader = prepare_loader(train_data, valid_data, config)
+
+    fitter = Fitter(model, device, config)
+    train_tracker, valid_tracker = fitter.fit(train_loader, valid_loader, fold)
+    plot_history(train_tracker, valid_tracker, fold, config)
 
 
 
 #Main Loop
-def train_loop(df, config, device, audio_image_store, fold_num:int=None, train_one_fold=False):
+def train_loop(df, config, device, audio_image_store, logger, fold_num:int=None, train_one_fold=False):
     if train_one_fold:
-        train_fold(df, config, device, fold_num, audio_image_store)
+        train_fold(df, config, device, fold_num, audio_image_store, logger)
     else:
         for fold in range(config.NUM_FOLDS):
-            train_fold(df, config, device, fold, audio_image_store)
+            train_fold(df, config, device, fold, audio_image_store, logger)
 
 
 
@@ -112,7 +116,6 @@ if __name__ == '__main__':
     logger = log(config, 'training')
     logger.info(config.__dict__)
     logger.info(args)
-    logger.info("-------------------------------------------------------------------")
 
     seed_everything(config.SEED)
     df = pd.read_csv(config.CSV_PATH, nrows=None)
@@ -121,9 +124,11 @@ if __name__ == '__main__':
 
     #load image
     if config.LOAD_FROM_MEM:
+        logger.info("Loading spectrogram images to memory...")
         audio_image_store = load_data(df, config)
     else:
         audio_image_store = None
 
+    logger.info("-------------------------------------------------------------------")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    train_loop(df, config, device, audio_image_store, train_one_folds=args.train_one_fold)
+    train_loop(df, config, device, audio_image_store, logger, train_one_fold=args.train_one_fold)

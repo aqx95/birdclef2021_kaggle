@@ -19,7 +19,7 @@ class GlobalConfig:
     TRAIN_IMAGE_PATH = Path('/content/audio_images')
     CSV_PATH = Path('/content/rich_train_metadata.csv')
     SAVE_PATH = Path('../../save')
-    LOG_PATH = Path('../. ./log')
+    LOG_PATH = Path('../../log')
 
     MODEL_NAME = 'resnet50'
     PRETRAINED = True
