@@ -96,7 +96,7 @@ class Fitter():
             #Save
             if self.best_f1 < valid_metrics['f1']:
               self.logger.info(f"F1 score improved {self.best_f1} -> {valid_metrics['f1']}. Saving Model...")
-              self.save(self.config.SAVE_PATH/'{}_fold{}.pt'.format(self.config.MODEL_NAME, fold))
+              self.save(os.path.join(self.config.SAVE_PATH, '{}_fold{}.pt'.format(self.config.MODEL_NAME, fold)))
               self.best_f1 = valid_metrics['f1']
 
             #Update scheduler

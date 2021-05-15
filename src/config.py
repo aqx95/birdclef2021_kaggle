@@ -17,10 +17,10 @@ class GlobalConfig:
     TRAIN_STEP_SCHEDULER = False
     VAL_STEP_SCHEDULER = True
 
-    TRAIN_IMAGE_PATH = Path('/content/audio_images')
-    CSV_PATH = Path('/content/rich_train_metadata.csv')
-    SAVE_PATH = Path('../../save')
-    LOG_PATH = Path('../../log')
+    TRAIN_IMAGE_PATH = '/content/audio_images'
+    CSV_PATH = '/content/rich_train_metadata.csv'
+    SAVE_PATH = '../../save'
+    LOG_PATH = '../../log'
 
     MODEL_NAME = 'resnet50'
     PRETRAINED = True

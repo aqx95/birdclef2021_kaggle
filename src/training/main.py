@@ -35,7 +35,7 @@ from engine import Fitter
 #Load spectrogram images to memory
 def load_data(df, config):
     def load_row(row):
-        impath = config.TRAIN_IMAGE_PATH/f"{row.primary_label}/{row.filename}.npy"
+        impath = os.path.join(config.TRAIN_IMAGE_PATH, f"{row.primary_label}/{row.filename}.npy")
         return row.filename, np.load(str(impath))[:config.MAX_READ_SAMPLES]
     pool = joblib.Parallel(4)
     mapper = joblib.delayed(load_row)
@@ -65,7 +65,7 @@ def plot_history(train, valid, fold, config):
         plt.ylabel(key)
         plt.legend(['train', 'valid'])
 
-    plt.savefig(config.SAVE_PATH/f'{config.MODEL_NAME}_history_fold_{fold}.png')
+    plt.savefig(os.path.join(config.SAVE_PATH, f'{config.MODEL_NAME}_history_fold_{fold}.png'))
 
 
  #Train single fold
