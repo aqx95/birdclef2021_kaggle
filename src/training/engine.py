@@ -14,6 +14,30 @@ from utils.logger import log
 from sklearn.metrics import label_ranking_average_precision_score
 
 
+def mixup_data(x, y, alpha=0.4):
+    """
+    Applies mixup to a sample
+    Arguments:
+        x {torch tensor} -- Input batch
+        y {torch tensor} -- Labels
+    Keyword Arguments:
+        alpha {float} -- Parameter of the beta distribution (default: {0.4})
+    Returns:
+        torch tensor  -- Mixed input
+        torch tensor  -- Labels of the original batch
+        torch tensor  -- Labels of the shuffle batch
+        float  -- Probability samples by the beta distribution
+    """
+    lam = np.random.beta(alpha, alpha) if alpha > 0 else 1
+
+    index = torch.randperm(x.size()[0]).cuda()
+
+    mixed_x = lam * x + (1 - lam) * x[index, :]
+    y_a, y_b = y, y[index]
+
+    return mixed_x, y_a, y_b, lam
+
+
 class Fitter():
     def __init__(self, model, device, config):
         self.model = model
@@ -97,6 +121,10 @@ class Fitter():
             imgs, labels = imgs.to(self.device), labels.to(self.device)
             batch_size = labels.shape[0]
             metric = {}
+
+            if np.random.rand() < 0.5 and self.config.MIXUP:
+                imgs, y_a, y_b, _ = mixup_data(imgs, labels, alpha=5)
+                labels = torch.clamp(y_a + y_b, 0, 1)
 
             self.optimizer.zero_grad()
             output = self.model(imgs)
