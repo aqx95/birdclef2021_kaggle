@@ -36,6 +36,7 @@ class BirdClefDataset(Dataset):
 
         label = np.zeros(self.num_classes, dtype=np.float32) + 0.0025
         label[row.label_id] = 0.99
+        label[row.secondary_id] = 0.2
 
         return image, label
 
