@@ -9,7 +9,7 @@ import re, time, json
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from  ast import literal_eval
+from ast import literal_eval
 from tqdm import tqdm
 from matplotlib import pyplot as plt
 plt.style.use('ggplot')
@@ -43,6 +43,13 @@ def load_data(df, config):
     res = pool(tqdm(tasks))
     res = dict(res)
     return res
+
+#mapper for secondary labels
+def map_id(sec_label, dict):
+  for idx, i in enumerate(sec_label):
+    if i == 'rocpig1':
+      sec_label[idx] = 'rocpig'
+  return [dict[label] for label in sec_label]
 
 #Set seed for reproducibility
 def seed_everything(seed=42):
@@ -121,6 +128,8 @@ if __name__ == '__main__':
     df = pd.read_csv(config.CSV_PATH, nrows=None)
     df["secondary_labels"] = df["secondary_labels"].apply(literal_eval)
     LABEL_IDS = {label: label_id for label_id,label in enumerate(sorted(df["primary_label"].unique()))}
+    df['secondary_id'] = df['secondary_labels'].apply(lambda x:map_id(x, LABEL_IDS))
+
 
     #load image
     if config.LOAD_FROM_MEM:
