@@ -77,7 +77,7 @@ def plot_history(train, valid, fold, config):
 
  #Train single fold
 def train_fold(df, config, device, fold, audio_image_store, logger):
-    model = BirdClefModel(config.MODEL_NAME, config.NUM_CLASSES).to(device)
+    model = BirdClefModel(config.MODEL_NAME, config.NUM_CLASSES, pretrained=config.PRETRAINED).to(device)
     train_df = df[df["fold"] != fold].reset_index(drop=True)
     valid_df = df[df["fold"] == fold].reset_index(drop=True)
 

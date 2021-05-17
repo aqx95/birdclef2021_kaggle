@@ -2,7 +2,7 @@ import timm
 import torch.nn as nn
 
 class BirdClefModel(nn.Module):
-    def __init__(self, model_name, n_class, drop_rate=0.0, pretrained=False):
+    def __init__(self, model_name, n_class, drop_rate=0.0, pretrained=True):
         super().__init__()
         self.model = timm.create_model(model_name, drop_rate=drop_rate, pretrained=pretrained)
         if hasattr(self.model, "fc"):
