@@ -20,7 +20,7 @@ class GlobalConfig:
     TRAIN_IMAGE_PATH = '/content/audio_images'
     CSV_PATH = '/content/rich_train_metadata.csv'
     SAVE_PATH = '../../save'
-    LOG_PATH = '../../log'
+    LOG_PATH = '../../logs'
 
     MODEL_NAME = 'resnet50'
     PRETRAINED = True
