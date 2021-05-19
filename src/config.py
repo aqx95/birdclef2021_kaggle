@@ -12,7 +12,8 @@ class GlobalConfig:
     VERBOSE = True
     LOAD_FROM_MEM = False
     NUM_FOLDS = 5
-    MIXUP = True
+    MIXUP = False
+    SPEC_AUG = True
 
     TRAIN_STEP_SCHEDULER = False
     VAL_STEP_SCHEDULER = True
