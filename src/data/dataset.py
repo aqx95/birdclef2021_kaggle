@@ -3,7 +3,7 @@ import torch
 import numpy as np
 from audiomentations import *
 
-from transforms import spec_augment
+from data.transforms import spec_augment
 from torch.utils.data import Dataset, DataLoader
 
 class BirdClefDataset(Dataset):
@@ -36,7 +36,7 @@ class BirdClefDataset(Dataset):
             image = np.load(str(impath))[:self.config.MAX_READ_SAMPLES]
 
         image = image[np.random.choice(len(image))]
-        if self.transform:
+        if self.transform and np.random.rand()<0.5:
             image = self.transform(image)
         image = self.normalize(image)
 
