@@ -2,6 +2,8 @@ import os
 import torch
 import numpy as np
 from audiomentations import *
+
+from transforms import spec_augment
 from torch.utils.data import Dataset, DataLoader
 
 class BirdClefDataset(Dataset):
@@ -14,7 +16,7 @@ class BirdClefDataset(Dataset):
         self.is_train = is_train
         self.duration = duration
         self.audio_length = duration * sr
-        self.transform = get_spec_transform() if is_train and config.SPEC_AUG else None
+        self.transform = spec_augment() if is_train and config.SPEC_AUG else None
 
     @staticmethod
     def normalize(image):
@@ -58,8 +60,3 @@ def prepare_loader(train_data, valid_data, config):
                     shuffle=False)
 
     return train_loader, valid_loader
-
-
-def get_spec_transform():
-    transforms= Compose([SpecFrequencyMask(p=0.3)])
-    return transforms
