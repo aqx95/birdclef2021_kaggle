@@ -39,7 +39,7 @@ def mixup_data(x, y, alpha=0.4):
 
 
 class Fitter():
-    def __init__(self, model, device, config):
+    def __init__(self, model, device, config, class_weight):
         self.model = model
         self.device = device
         self.config = config
@@ -55,7 +55,10 @@ class Fitter():
         if not os.path.exists(self.config.LOG_PATH):
             os.makedirs(self.config.LOG_PATH)
 
-        self.loss = nn.BCEWithLogitsLoss()
+        if config.USE_WEIGHT:
+            self.loss = nn.BCEWithLogitsLoss(pos_weight=class_weight)
+        else:
+            self.loss = nn.BCEWithLogitsLoss()
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=8e-4)
         self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, eta_min=1e-5, T_max=self.config.NUM_EPOCHS)
 

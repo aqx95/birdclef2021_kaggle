@@ -15,6 +15,7 @@ class GlobalConfig:
     MIXUP = False
     SPEC_AUG = False
 
+    USE_WEIGHT = True
     TRAIN_STEP_SCHEDULER = False
     VAL_STEP_SCHEDULER = True
 
