@@ -32,8 +32,12 @@ class BirdClefDataset(Dataset):
         if self.config.LOAD_FROM_MEM:
             image = self.spec_store[row.filename]
         else:
-            impath = os.path.join(self.config.TRAIN_IMAGE_PATH, f"{row.primary_label}/{row.filename}.npy")
-            image = np.load(str(impath))[:self.config.MAX_READ_SAMPLES]
+            if row.label_id == 397:
+                impath = os.path.join(self.config.NOCALL_IMAGE_PATH, f"{row.primary_label}/{row.filename}.npy")
+                image = np.load(str(impath))
+            else:
+                impath = os.path.join(self.config.TRAIN_IMAGE_PATH, f"{row.primary_label}/{row.filename}.npy")
+                image = np.load(str(impath))[:self.config.MAX_READ_SAMPLES]
 
         image = image[np.random.choice(len(image))]
         if self.transform and np.random.rand()<0.5:
