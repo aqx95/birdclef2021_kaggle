@@ -56,7 +56,7 @@ class Fitter():
             os.makedirs(self.config.LOG_PATH)
 
         if config.USE_WEIGHT:
-            self.loss = nn.BCEWithLogitsLoss(pos_weight=class_weight)
+            self.loss = nn.BCEWithLogitsLoss(pos_weight=class_weight.to(device))
         else:
             self.loss = nn.BCEWithLogitsLoss()
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=8e-4)
