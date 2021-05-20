@@ -35,8 +35,12 @@ from engine import Fitter
 #Load spectrogram images to memory
 def load_data(df, config):
     def load_row(row):
-        impath = os.path.join(config.TRAIN_IMAGE_PATH, f"{row.primary_label}/{row.filename}.npy")
-        return row.filename, np.load(str(impath))[:config.MAX_READ_SAMPLES]
+        if row.label_id == 397:
+            impath = os.path.join(config.NOCALL_IMAGE_PATH, f"{row.primary_label}/{row.filename}.npy")
+            return row.filename, np.load(str(impath))
+        else:
+            impath = os.path.join(config.TRAIN_IMAGE_PATH, f"{row.primary_label}/{row.filename}.npy")
+            return row.filename, np.load(str(impath))[:config.MAX_READ_SAMPLES]
     pool = joblib.Parallel(4)
     mapper = joblib.delayed(load_row)
     tasks = [mapper(row) for row in df.itertuples(False)]
@@ -81,6 +85,11 @@ def train_fold(df, config, device, fold, audio_image_store, logger):
     train_df = df[df["fold"] != fold].reset_index(drop=True)
     valid_df = df[df["fold"] == fold].reset_index(drop=True)
 
+    #class weights initialise
+    class_weight = torch.zeros((1,config.NUM_CLASSES))
+    for i, count in train_df['label_id'].value_counts().sort_index().items():
+        class_weight[:,i] = count
+
     #log fold statistics
     logger.info("Fold {}: Number of unique labels in train: {}".format(fold, train_df['primary_label'].nunique()))
 
@@ -91,7 +100,7 @@ def train_fold(df, config, device, fold, audio_image_store, logger):
     train_loader, valid_loader = prepare_loader(train_data, valid_data, config)
 
     fitter = Fitter(model, device, config)
-    train_tracker, valid_tracker = fitter.fit(train_loader, valid_loader, fold)
+    train_tracker, valid_tracker = fitter.fit(train_loader, valid_loader, fold, class_weight)
     plot_history(train_tracker, valid_tracker, fold, config)
 
 
@@ -125,11 +134,19 @@ if __name__ == '__main__':
     logger.info(args)
 
     seed_everything(config.SEED)
-    df = pd.read_csv(config.CSV_PATH, nrows=None)
-    df["secondary_labels"] = df["secondary_labels"].apply(literal_eval)
-    LABEL_IDS = {label: label_id for label_id,label in enumerate(sorted(df["primary_label"].unique()))}
-    df['secondary_id'] = df['secondary_labels'].apply(lambda x:map_id(x, LABEL_IDS))
+    #Read train
+    train_df = pd.read_csv(config.TRAIN_CSV_PATH, nrows=None)
+    train_df["secondary_labels"] = train_df["secondary_labels"].apply(literal_eval)
+    LABEL_IDS = {label: label_id for label_id,label in enumerate(sorted(train_df["primary_label"].unique()))}
+    train_df['secondary_id'] = train_df['secondary_labels'].apply(lambda x:map_id(x, LABEL_IDS))
+    train_df = train_df[config.TRAIN_COLS]
 
+    #Read nocall
+    nocall_df = pd.read_csv(config.NOCALL_CSV_PATH)
+    nocall_df = nocall_df[config.NOCALL_COLS]
+    nocall_df.columns = config.TRAIN_COLS
+
+    df = pd.concat([train_df, nocall_df], axis=0)
 
     #load image
     if config.LOAD_FROM_MEM:
