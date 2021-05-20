@@ -138,15 +138,16 @@ if __name__ == '__main__':
     train_df = pd.read_csv(config.TRAIN_CSV_PATH, nrows=None)
     train_df["secondary_labels"] = train_df["secondary_labels"].apply(literal_eval)
     LABEL_IDS = {label: label_id for label_id,label in enumerate(sorted(train_df["primary_label"].unique()))}
-    train_df['secondary_id'] = train_df['secondary_labels'].apply(lambda x:map_id(x, LABEL_IDS))
     train_df = train_df[config.TRAIN_COLS]
 
     #Read nocall
     nocall_df = pd.read_csv(config.NOCALL_CSV_PATH)
+    nocall_df["secondary_labels"] = nocall_df["secondary_labels"].apply(literal_eval)
     nocall_df = nocall_df[config.NOCALL_COLS]
     nocall_df.columns = config.TRAIN_COLS
 
     df = pd.concat([train_df, nocall_df], axis=0)
+    df['secondary_id'] = df['secondary_labels'].apply(lambda x:map_id(x, LABEL_IDS))
 
     #load image
     if config.LOAD_FROM_MEM:
