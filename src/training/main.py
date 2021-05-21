@@ -88,7 +88,7 @@ def train_fold(df, config, device, fold, audio_image_store, logger):
     #class weights initialise
     class_weight = torch.zeros((1,config.NUM_CLASSES))
     for i, count in train_df['label_id'].value_counts().sort_index().items():
-        class_weight[:,i] = 1/count
+        class_weight[:,i] = len(train_df)/(count*config.NUM_CLASSES)
 
     #log fold statistics
     logger.info("Fold {}: Number of unique labels in train: {}".format(fold, train_df['primary_label'].nunique()))
