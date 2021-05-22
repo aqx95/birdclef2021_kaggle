@@ -3,6 +3,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from torchlibrosa.augmentation import SpecAugmentation
+
 # SED Components
 
 def init_layer(layer):

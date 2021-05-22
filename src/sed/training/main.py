@@ -1,5 +1,5 @@
 import sys
-sys.path.append("../../src/")
+sys.path.append("../../sed/")
 
 import joblib
 import logging
