@@ -15,6 +15,7 @@ class GlobalConfig:
     SECONDARY_ID = True
     RESIZE = False
     USE_NOCALL = False
+    FIRST_LAST = False
 
     MIXUP = False
     SPEC_AUG = False

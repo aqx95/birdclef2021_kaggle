@@ -151,6 +151,7 @@ if __name__ == '__main__':
         nocall_df["secondary_labels"] = nocall_df["secondary_labels"].apply(literal_eval)
         nocall_df = nocall_df[config.NOCALL_COLS]
         nocall_df.columns = config.TRAIN_COLS
+        nocall_df = nocall_df.groupby('fold').apply(lambda x: x.sample(n=500)).reset_index(drop = True)
 
         df = pd.concat([df, nocall_df], axis=0)
 
