@@ -12,6 +12,8 @@ class GlobalConfig:
     VERBOSE = True
     LOAD_FROM_MEM = True
     NUM_FOLDS = 5
+    SECONDARY_ID = True
+
     MIXUP = False
     SPEC_AUG = False
 
