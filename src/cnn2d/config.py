@@ -14,6 +14,7 @@ class GlobalConfig:
     NUM_FOLDS = 5
     SECONDARY_ID = True
     RESIZE = False
+    USE_NOCALL = False
 
     MIXUP = False
     SPEC_AUG = False
