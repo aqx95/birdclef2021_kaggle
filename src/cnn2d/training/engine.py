@@ -125,7 +125,7 @@ class Fitter():
             batch_size = labels.shape[0]
             metric = {}
 
-            if np.random.rand() < 0.5 and self.config.MIXUP:
+            if np.random.rand() < 0.4 and self.config.MIXUP:
                 imgs, y_a, y_b, _ = mixup_data(imgs, labels, alpha=5)
                 labels = torch.clamp(y_a + y_b, 0, 1)
 

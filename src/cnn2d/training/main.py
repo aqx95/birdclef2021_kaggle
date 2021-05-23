@@ -101,6 +101,9 @@ def train_fold(df, config, device, fold, audio_image_store, logger):
                               sr=config.SR, duration=config.DURATION, config=config, is_train=False)
     train_loader, valid_loader = prepare_loader(train_data, valid_data, config)
 
+    img, label = train_data[0]
+    logger.info("Image size: {}".format(img.shape))
+
     fitter = Fitter(model, device, config, class_weight)
     train_tracker, valid_tracker = fitter.fit(train_loader, valid_loader, fold)
     plot_history(train_tracker, valid_tracker, fold, config)
