@@ -41,12 +41,12 @@ class BirdClefDataset(Dataset):
                 image = np.load(str(impath))[:self.config.MAX_READ_SAMPLES]
 
         image = image[np.random.choice(len(image))]
-        
+
         if self.transform and np.random.rand()<0.5:
             image = self.transform(image)
         if self.config.RESIZE:
-            img = torch.FloatTensor(img).unsqueeze(0)
-            mel_spec = torchvision.transforms.Resize((224, img.size()[-1]))(img).squeeze(0).numpy()
+            image = torch.FloatTensor(image).unsqueeze(0)
+            image = torchvision.transforms.Resize((224, image.size()[-1]))(image).squeeze(0).numpy()
         image = self.normalize(image)
 
         label = np.zeros(self.num_classes, dtype=np.float32)
