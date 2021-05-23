@@ -137,10 +137,10 @@ if __name__ == '__main__':
 
     seed_everything(config.SEED)
     #Read train
-    train_df = pd.read_csv(config.TRAIN_CSV_PATH, nrows=None)
-    train_df["secondary_labels"] = train_df["secondary_labels"].apply(literal_eval)
-    LABEL_IDS = {label: label_id for label_id,label in enumerate(sorted(train_df["primary_label"].unique()))}
-    train_df = train_df[config.TRAIN_COLS]
+    df = pd.read_csv(config.TRAIN_CSV_PATH, nrows=None)
+    df["secondary_labels"] = df["secondary_labels"].apply(literal_eval)
+    LABEL_IDS = {label: label_id for label_id,label in enumerate(sorted(df["primary_label"].unique()))}
+    df = df[config.TRAIN_COLS]
 
     #Read nocall
     if config.USE_NOCALL:
@@ -149,7 +149,7 @@ if __name__ == '__main__':
         nocall_df = nocall_df[config.NOCALL_COLS]
         nocall_df.columns = config.TRAIN_COLS
 
-        df = pd.concat([train_df, nocall_df], axis=0)
+        df = pd.concat([df, nocall_df], axis=0)
 
     df['secondary_id'] = df['secondary_labels'].apply(lambda x:map_id(x, LABEL_IDS))
 
