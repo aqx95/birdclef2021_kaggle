@@ -28,7 +28,7 @@ class GlobalConfig:
 
     TRAIN_IMAGE_PATH = '/content/audio_images'
     NOCALL_IMAGE_PATH = '/content/nocall_images'
-    TRAIN_CSV_PATH = '/content/rich_train_metadata.csv'
+    TRAIN_CSV_PATH = '/content/drive/Shareddrives/Deep Learning/rich_train_metadata.csv'
     NOCALL_CSV_PATH = '/content/nocall.csv'
     SAVE_PATH = '../../save'
     LOG_PATH = '../../logs'
