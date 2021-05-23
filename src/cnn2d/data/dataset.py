@@ -41,6 +41,7 @@ class BirdClefDataset(Dataset):
                 image = np.load(str(impath))[:self.config.MAX_READ_SAMPLES]
 
         image = image[np.random.choice(len(image))]
+        
         if self.transform and np.random.rand()<0.5:
             image = self.transform(image)
         if self.config.RESIZE:
