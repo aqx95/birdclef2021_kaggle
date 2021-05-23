@@ -13,6 +13,7 @@ class GlobalConfig:
     LOAD_FROM_MEM = True
     NUM_FOLDS = 5
     SECONDARY_ID = True
+    RESIZE = False
 
     MIXUP = False
     SPEC_AUG = False
