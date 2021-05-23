@@ -89,7 +89,8 @@ def train_fold(df, config, device, fold, audio_image_store, logger):
     class_weight = torch.zeros((1,config.NUM_CLASSES))
     for i, count in train_df['label_id'].value_counts().sort_index().items():
         class_weight[:,i] = len(train_df)/(count*config.NUM_CLASSES)
-    class_weight[:-1] = 1
+    if config.USE_NOCALL:
+        class_weight[:-1] = 1
 
     #log fold statistics
     logger.info("Fold {}: Number of unique labels in train: {}".format(fold, train_df['primary_label'].nunique()))
@@ -149,7 +150,7 @@ if __name__ == '__main__':
         nocall_df.columns = config.TRAIN_COLS
 
         df = pd.concat([train_df, nocall_df], axis=0)
-        
+
     df['secondary_id'] = df['secondary_labels'].apply(lambda x:map_id(x, LABEL_IDS))
 
     #load image
