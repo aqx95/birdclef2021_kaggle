@@ -45,7 +45,7 @@ class BirdClefDataset(Dataset):
         image = self.normalize(image)
 
         label = np.zeros(self.num_classes, dtype=np.float32)
-        label[row.label_id] = 0.99
+        label[row.label_id] = 1
         if self.config.SECONDARY_ID:
             label[row.secondary_id] = 0.2
 
