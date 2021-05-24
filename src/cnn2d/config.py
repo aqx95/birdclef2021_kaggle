@@ -17,12 +17,13 @@ class GlobalConfig:
     USE_NOCALL = False
     FIRST_LAST = False
 
+    WARMUP_PROB = 0.5
     MIXUP = False
     SPEC_AUG = False
 
     USE_WEIGHT = False
-    TRAIN_STEP_SCHEDULER = False
-    VAL_STEP_SCHEDULER = True
+    TRAIN_STEP_SCHEDULER = True
+    VAL_STEP_SCHEDULER = False
 
     TRAIN_COLS = ['primary_label', 'secondary_labels', 'label_id', 'filename', 'fold']
     NOCALL_COLS = ['primary_label', 'secondary_labels', 'label_id', 'itemid', 'fold']

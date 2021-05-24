@@ -8,6 +8,7 @@ import time
 import pytz
 import torch
 import logging
+from transformers import get_linear_schedule_with_warmup
 
 from meter import MetricMeter
 from utils.logger import log
@@ -60,10 +61,17 @@ class Fitter():
         else:
             self.loss = nn.BCEWithLogitsLoss()
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=8e-4)
-        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, eta_min=1e-5, T_max=self.config.NUM_EPOCHS)
+
+        #self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, eta_min=1e-5, T_max=self.config.NUM_EPOCHS)
 
 
     def fit(self, train_loader, valid_loader, fold):
+        num_warmup_steps = int(self.config.WARMUP_PROB * self.config.NUM_EPOCHS * len(train_loader))
+        num_training_steps = int(self.config.NUM_EPOCHS * len(train_loader))
+        self.scheduler = get_linear_schedule_with_warmup(
+            self.optimizer, num_warmup_steps, num_training_steps
+            )
+
         self.logger.info("Training on Fold {} with {}".format(fold, self.config.MODEL_NAME))
 
         for epoch in range(self.config.NUM_EPOCHS):
@@ -152,7 +160,7 @@ class Fitter():
             meter.update(metric)
 
             if self.config.TRAIN_STEP_SCHEDULER:
-                self.scheduler.step(self.epoch + step/len(train_loader))
+                self.scheduler.step()
 
             metrics = meter.avg
             if self.config.VERBOSE:
