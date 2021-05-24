@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 class GlobalConfig:
     SEED = 2020
     BATCH_SIZE = 64
