@@ -2,22 +2,22 @@ from pathlib import Path
 
 class GlobalConfig:
     SEED = 2020
-    BATCH_SIZE = 100
+    BATCH_SIZE = 64
     NUM_WORKERS = 2
     NUM_CLASSES = 397 #add nocall + 1
     SR = 32000
     DURATION = 7
-    MAX_READ_SAMPLES = 10
+    MAX_READ_SAMPLES = 20
     NUM_EPOCHS = 20
     VERBOSE = True
-    LOAD_FROM_MEM = True
+    LOAD_FROM_MEM = False
     NUM_FOLDS = 5
-    SECONDARY_ID = True
+    SECONDARY_ID = False
     RESIZE = False
     USE_NOCALL = False
     FIRST_LAST = False
 
-    WARMUP_PROB = 0.5
+    WARMUP_PROB = 0.05
     MIXUP = False
     SPEC_AUG = False
 
