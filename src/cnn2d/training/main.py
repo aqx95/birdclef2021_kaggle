@@ -90,7 +90,7 @@ def train_fold(df, config, device, fold, audio_image_store, logger):
     for i, count in train_df['label_id'].value_counts().sort_index().items():
         class_weight[:,i] = len(train_df)/(count*config.NUM_CLASSES)
     if config.USE_NOCALL:
-        class_weight[:-1] = 1
+        class_weight[:, -1] = 1
 
     #log fold statistics
     logger.info("Fold {}: Number of unique labels in train: {}".format(fold, train_df['primary_label'].nunique()))
@@ -149,8 +149,9 @@ if __name__ == '__main__':
     if config.USE_NOCALL:
         nocall_df = pd.read_csv(config.NOCALL_CSV_PATH)
         nocall_df["secondary_labels"] = nocall_df["secondary_labels"].apply(literal_eval)
-        nocall_df = nocall_df[config.NOCALL_COLS]
-        nocall_df.columns = config.TRAIN_COLS
+        #nocall_df = nocall_df[config.NOCALL_COLS]
+        #nocall_df.columns = config.TRAIN_COLS
+        nocall_df = nocall_df[config.TRAIN_COLS]
         #nocall_df = nocall_df.groupby('fold').apply(lambda x: x.sample(n=500)).reset_index(drop = True)
 
         df = pd.concat([df, nocall_df], axis=0)
