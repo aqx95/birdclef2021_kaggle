@@ -30,9 +30,9 @@ class GlobalConfig:
     NOCALL_COLS = ['primary_label', 'secondary_labels', 'label_id', 'itemid', 'fold']
 
     TRAIN_IMAGE_PATH = '/content/audio_images'
-    NOCALL_IMAGE_PATH = '/content/nocall_images'
+    NOCALL_IMAGE_PATH = '/content/soundscape_nocall_images'
     TRAIN_CSV_PATH = '/content/drive/Shareddrives/Deep Learning/rich_train_metadata.csv'
-    NOCALL_CSV_PATH = '/content/nocall.csv'
+    NOCALL_CSV_PATH = '/content/nocall_train_metadata.csv'
     SAVE_PATH = '../../save'
     LOG_PATH = '../../logs'
 
