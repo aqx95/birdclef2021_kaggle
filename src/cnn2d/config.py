@@ -8,7 +8,7 @@ class GlobalConfig:
     NUM_CLASSES = 398 #add nocall + 1
     SR = 32000
     DURATION = 7
-    MAX_READ_SAMPLES = 20
+    MAX_READ_SAMPLES = 10
     NUM_EPOCHS = 20
     VERBOSE = True
     LOAD_FROM_MEM = False
