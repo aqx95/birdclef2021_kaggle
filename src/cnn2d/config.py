@@ -5,7 +5,7 @@ class GlobalConfig:
     SEED = 2020
     BATCH_SIZE = 64
     NUM_WORKERS = 2
-    NUM_CLASSES = 397 #add nocall + 1
+    NUM_CLASSES = 398 #add nocall + 1
     SR = 32000
     DURATION = 7
     MAX_READ_SAMPLES = 20
