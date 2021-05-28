@@ -1,4 +1,5 @@
 import os
+import random
 import torch
 import torchvision
 import numpy as np
@@ -51,6 +52,12 @@ class BirdClefDataset(Dataset):
         if self.config.RESIZE:
             image = torch.FloatTensor(image).unsqueeze(0)
             image = torchvision.transforms.Resize((224, image.size()[-1]))(image).squeeze(0).numpy()
+
+        # Add white noise
+        if random.random()<0.5 and self.config.AUGMENT:
+            image = image + (np.random.sample((self.config.NUM_MELS,self.audio_length)).astype(np.float32)+9) * image.mean() \
+                            * 0.05 * (np.random.sample() + 0.3)
+
         image = self.normalize(image)
 
         label = np.zeros(self.num_classes, dtype=np.float32)

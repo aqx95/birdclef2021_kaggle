@@ -5,7 +5,7 @@ class GlobalConfig:
     SEED = 2020
     BATCH_SIZE = 64
     NUM_WORKERS = 2
-    NUM_CLASSES = 398 #add nocall + 1
+    NUM_CLASSES = 397 #add nocall + 1
     SR = 32000
     DURATION = 7
     MAX_READ_SAMPLES = 10
@@ -21,6 +21,7 @@ class GlobalConfig:
     WARMUP_PROB = 0.05
     MIXUP = False
     SPEC_AUG = False
+    AUGMENT = False
 
     USE_WEIGHT = False
     TRAIN_STEP_SCHEDULER = True
