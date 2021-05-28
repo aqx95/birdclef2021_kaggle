@@ -1,5 +1,5 @@
 import sys
-sys.path.append("../../cnn2d/")
+sys.path.append("../../src/")
 
 import joblib
 import logging

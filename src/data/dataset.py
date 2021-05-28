@@ -55,7 +55,7 @@ class BirdClefDataset(Dataset):
 
         # Add white noise
         if random.random()<0.5 and self.config.AUGMENT:
-            image = image + (np.random.sample((self.config.NUM_MELS,self.audio_length)).astype(np.float32)+9) * image.mean() \
+            image = image + (np.random.sample((128,281)).astype(np.float32)+9) * image.mean() \
                             * 0.05 * (np.random.sample() + 0.3)
 
         image = self.normalize(image)
